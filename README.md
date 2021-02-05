@@ -1,36 +1,36 @@
 # Brother printer drivers for Raspberry Pi and other ARM devices
 
-Why? The Brother provided Linux drivers have parts that are compiled for i386 and have no source code. Although there is an [open source Brother Printer driver](https://github.com/pdewacht/brlaser), the issue is that it's not optimizied for cheap printers with small cache.
-It fails half-print when [trying to print large images or busy pages](https://github.com/pdewacht/brlaser/issues/95).
+Why? The Brother provided Linux drivers have parts that are compiled for i386 and have no source code. Although there is an [open source Brother Printer driver](https://github.com/pdewacht/brlaser), it is not optimizied for cheap printers with small cache.
+It fails part way into a print on [large images or busy pages](https://github.com/pdewacht/brlaser/issues/95).
 
 So, how do we port the closed-source driver to another architecture? There are several methods:
 
 * Run i386 code on ARM [through an emulator](https://wiki.alphaframe.net/doku.php?id=raspberry_pi:brotherh1110). However, if you are using RPi the emulation layer will make it terribly slow.
-* Reverse engineer and compile the required parts for ARM. This has only been [done for rawtobr3]((https://github.com/k1-801/rawtobr3) as far as I know. There is also an original source available for `brcupsconfig4`, but other part are missing.
-* Scavange and collect Brother's own code into full ARM packages. This is the approach taken here.
+* Reverse engineer and compile the required parts for ARM. This has only been [done for rawtobr3](https://github.com/k1-801/rawtobr3) as far as I know. There is also an original source available for `brcupsconfig4`, but other part are missing.
+* Scavange and collect Brother's own code into full ARM install packages. This is the approach taken here.
 
 ## Background
 
 Many Brother printers are designed for LPR and lack support for common page description languages (PDF, PCL, etc). They require a CUPS wrapper to translate the options to their native speak.
 
-There are at least four Brother provided pre-compiled binaries. They are compiled for x86 32-bit architecture (i386), and can not run on ARM/ARM64. specifically:
+There are at least four Brother provided pre-compiled x86 32-bit binaries and can not run on ARM/ARM64. Specifically:
 
-* /usr/local/Brother/Printer/HL2270DW/cupswrapper/brcupsconfig4 - wrapper that calls on `brprintconflsr3` to set up `/usr/share/Brother/inf` on every print to pass the current options.
-* /usr/local/Brother/Printer/HL2270DW/lpd/rawtobr3 - converter for the job to a raster format. Seems to be model-agnostic. Called by `/opt/brother/Printers/BrGenPrintML2/lpd/lpdfilter`
-* /usr/local/Brother/Printer/HL2270DW/inf/brprintconflsr3 - translates job options to Brother format. Seems to be backward compatible. Called by `/opt/brother/Printers/BrGenPrintML2/cupswrapper/lpdwrapper` from `brgenprintml2pdrv-4.0.0-1.i386.deb` which is itself in the `opt/brother/Printers/BrGenPrintML2/cupswrapper/brother-BrGenPrintML2-cups-en.ppd`
-* /usr/local/Brother/Printer/HL2270DW/inf/braddprinter - adds alphanumeric printer model name to `/usr/share/Brother/inf/brPrintList` upon installation. This can be safely ignored.
+* `/usr/local/Brother/Printer/HL2270DW/cupswrapper/brcupsconfig4` - wrapper that calls on `brprintconflsr3` to set up `/usr/share/Brother/inf` on every print to pass the current options.
+* `/usr/local/Brother/Printer/HL2270DW/lpd/rawtobr3` - converter for the job to a raster format. Seems to be model-agnostic. Called by `/opt/brother/Printers/BrGenPrintML2/lpd/lpdfilter`
+* `/usr/local/Brother/Printer/HL2270DW/inf/brprintconflsr3` - translates job options to Brother format. Seems to be backward compatible. Called by `/opt/brother/Printers/BrGenPrintML2/cupswrapper/lpdwrapper` from `brgenprintml2pdrv-4.0.0-1.i386.deb` which is itself in the `opt/brother/Printers/BrGenPrintML2/cupswrapper/brother-BrGenPrintML2-cups-en.ppd`
+* `/usr/local/Brother/Printer/HL2270DW/inf/braddprinter` - adds alphanumeric printer model name to `/usr/share/Brother/inf/brPrintList` upon installation. This can be safely ignored.
 
-Below is the example of how to create ARM packages for HL2270DW, but it should work for other printers, both on ARM64 and ARM32 RPis. Substitute the proper packages for your printer. Here are some ways to find these packages:
+Below is the example of how to create ARM packages for HL2270DW, but it should work for other printers, both on ARM64 and ARM32 RPis. Substitute the proper packages for your printer. To find these packages:
 
-1. Head out to the Brother website and grab the native i386 Linux deb pacakges.
-2. Use `tools/web_brother.sh` from [a Brother copyist](https://github.com/illwieckz/debian_copyist_brother) or `curl http://www.brother.com/pub/bsc/linux/infs/<uppercasedmodelhere>` and then grab these packages from http://www.brother.com/pub/bsc/linux/packages/.
-3. As a last resort you can run the [linux-brprinter-installer](https://download.brother.com/welcome/dlf006893/linux-brprinter-installer-2.2.2-1.gz) with `set -e` to see all the URLs that its probing before it confirming the installation.
+* Head out to the Brother website and grab the native i386 Linux deb pacakges. Or
+* Use `tools/web_brother.sh` from [a Brother copyist](https://github.com/illwieckz/debian_copyist_brother) or `curl http://www.brother.com/pub/bsc/linux/infs/<uppercasedmodelhere>` and then grab these packages from http://www.brother.com/pub/bsc/linux/packages/. Or
+* Run the [linux-brprinter-installer](https://download.brother.com/welcome/dlf006893/linux-brprinter-installer-2.2.2-1.gz) with `set -e` injected to see all the URLs that its probing before it confirming the installation.
 
 Oh, yeah and next time just buy a printer that has [Driverless printing](https://wiki.debian.org/DriverlessPrinting#The_Concept_of_Driverless_Printing) or [IPP Everywhere](https://wiki.debian.org/IPPEverywhere)
 
-## Creating the ARM packages for HL2270
+## Creating the ARM packages for HL2270-DW
 
-We'll be grabbing 2 native arm32 executable and compile one other. All steps can be done on RPi or on i386, but you'd need to cross-compile `brcupsconfig` for armhf on the latter.
+We'll be grabbing 2 native arm32 executables and compile one other. All the steps can be done on RPi or on i386, but you'd need to cross-compile `brcupsconfig` for armhf on the latter.
 
 ### Repackage LPR drivers
 
@@ -65,7 +65,7 @@ Grab and extract the `brcupsconfig4` sources
 	tar zxvf brhl2270dwcups_src-2.0.4-2.tar.gz
 	cd brhl2270dwcups_src-2.0.4-2
 
-Compile brcupsconfig4
+Compile `brcupsconfig4`
 
 	gcc brcupsconfig3/brcupsconfig.c -o brcupsconfig4
 
