@@ -30,6 +30,8 @@ Oh, yeah and next time just buy a printer that has [Driverless printing](https:/
 
 ## Creating the ARM packages for HL2270-DW
 
+> Note: if you just want to install the precompiled packages grab them from this repo and run `sudo apt install psutils cups; sudo dpkg -i hl2270dwlpr-2.1.0-1.armhf.deb cupswrapperHL2270DW-2.0.4-2.armhf.deb`. Steps below show how to re-create them.
+
 We'll be grabbing 2 native arm32 executables and compile one other. All the steps can be done on RPi or on i386, but you'd need to cross-compile `brcupsconfig` for armhf on the latter.
 
 ### Repackage LPR drivers
