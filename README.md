@@ -9,6 +9,12 @@ So, how do we port the closed-source driver to another architecture? There are s
 * Reverse engineer and compile the required parts for ARM. This has only been [done for rawtobr3](https://github.com/k1-801/rawtobr3) as far as I know. There is also an original source available for `brcupsconfig4`, but other part are missing.
 * Scavange and collect Brother's own code into full ARM install packages. This is the approach taken here.
 
+## Quick start
+
+Run the `oh_brother.zsh` script with the model of the printer that you have, like this `./oh_brother.zsh HL-4570CDW`
+
+In case this does not work, read below:
+
 ## Background
 
 Many Brother printers are designed for LPR and lack support for common page description languages (PDF, PCL, etc). They require a CUPS wrapper to translate the options to their native speak.
@@ -107,9 +113,17 @@ Install prereqs and install the drivers
 
 > You may need to install  other runtime dependencies such as a2ps, glibc-32bit, ghostscript
 
-## How to
+### How to get the PPD and the filter
 
-### Installing on an x86 platform
+In case you're missing the printer defeniton you can extract it from the cupswrapper for from a Windows driver distribution using the [official brother method](https://help.brother-usa.com/app/answers/detail/a_id/164936/~/how-to-create-a-brother-ppd-file-for-installation---linux)
+
+Top extract extract the filter and the PPD file directly from the cupswrapper run this:
+
+    sed -e '0,/cat <<!ENDOFWFILTER! >/d' -e '/^!ENDOFWFILTER!/,$d' './cupswrapperHL2270DW-2.0.4' -e 's|\\||g' > ./brlpdwrapperHL2270DW
+    sed -e '0,/cat <<ENDOFPPDFILE >/d'   -e '/^ENDOFPPDFILE/,$d'   './cupswrapperHL2270DW-2.0.4'              > ./HL2270DW.ppd
+
+
+### How to install on an x86 platform
 
 Either use the driver installer, which is just a bash script that downloads the debs, or download the debs manually and install
 
@@ -117,14 +131,7 @@ Either use the driver installer, which is just a bash script that downloads the 
 	echo -e "HL2270-DW\ny\nn" | sudo bash linux-brprinter-installer-2.2.2-1
 	(HL2270-DW as "model name", then y to continue, "no" for "Will you specify the DeviceURI?" choose "No" for USB connection or "Yes" for network connection.
 
-or manually download debs and configure them
-
-### Getting the PPD and the filter
-
-You can extract the filter and the PPD file directly from the cupswrapper like this:
-
-    sed -e '0,/cat <<!ENDOFWFILTER! >/d' -e '/^!ENDOFWFILTER!/,$d' './cupswrapperHL2270DW-2.0.4' -e 's|\\||g' > ./brlpdwrapperHL2270DW
-    sed -e '0,/cat <<ENDOFPPDFILE >/d'   -e '/^ENDOFPPDFILE/,$d'   './cupswrapperHL2270DW-2.0.4'              > ./HL2270DW.ppd
+or manually download debs and configure them.
 
 ## References
 
