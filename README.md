@@ -1,6 +1,6 @@
 # Brother printer drivers for Raspberry Pi and other ARM devices
 
-Why? The Brother provided Linux drivers have parts that are compiled for i386 and have no source code. Although there is an [open source Brother Printer driver](https://github.com/pdewacht/brlaser), it is not optimizied for cheap printers with small cache.
+Why? The Brother provided Linux drivers have parts that are compiled for i386 and have no source code. Although there is an [open source Brother Printer driver](https://github.com/pdewacht/brlaser), it is not optimized for cheap printers with its small cache.
 It fails part way into a print on [large images or busy pages](https://github.com/pdewacht/brlaser/issues/95).
 
 So, how do we port the closed-source driver to another architecture? There are several methods:
