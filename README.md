@@ -5,9 +5,9 @@ It fails part way into a print on [large images or busy pages](https://github.co
 
 So, how do we port the closed-source driver to another architecture? There are several methods:
 
-* Run i386 code on ARM [through an emulator](https://wiki.alphaframe.net/doku.php?id=raspberry_pi:brotherh1110). However, if you are using RPi the emulation layer will make it terribly slow.
-* Reverse engineer and compile the required parts for ARM. This has only been [done for rawtobr3](https://github.com/k1-801/rawtobr3) as far as I know. There is also an original source available for `brcupsconfig4`, but other part are missing.
-* Scavange and collect Brother's own code into full ARM install packages. This is the approach taken here.
+1. Run i386 code on ARM [through an emulator](https://wiki.alphaframe.net/doku.php?id=raspberry_pi:brotherh1110). It works, but testing on RPi 4, the emulation layer overhead made printing terribly slow.
+1. Reverse engineer, recreate and recompile the code for ARM. This has only been done for [rawtobr3](https://github.com/k1-801/rawtobr3) as far as I know. There is also an original source available for `brcupsconfig4`, but other necessary part are missing.
+1. Scavange and collect Brother's own ARM code into the full ARM install package. This is the approach taken here.
 
 ## Quick start
 
