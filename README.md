@@ -1,6 +1,6 @@
 # Brother printer drivers for Raspberry Pi and other ARM devices
 
-Why? The Brother provided Linux drivers have parts that are compiled for i386 and have no source code. Although there is an [open source Brother Printer driver](https://github.com/pdewacht/brlaser), it is not optimized for cheap printers with its small cache.
+Why? The Brother provided Linux drivers have parts that are compiled for i386 and have no source code. Although there is an [open source Brother Printer driver](https://github.com/pdewacht/brlaser), it is not optimized for cheap printers with their small cache.
 It fails part way into a print on [large images or busy pages](https://github.com/pdewacht/brlaser/issues/95).
 
 So, how do we port the closed-source driver to another architecture? There are several methods:
@@ -13,20 +13,20 @@ So, how do we port the closed-source driver to another architecture? There are s
 
 Run the `oh_brother.zsh` script with the model of the printer that you have, like this `./oh_brother.zsh HL-4570CDW`
 
-In case this does not work, read below:
+If this script fails, you need to do the steps manually. Read below:
 
 ## Background
 
-Many Brother printers are designed for LPR and lack support for common page description languages (PDF, PCL, etc). They require a CUPS wrapper to translate the options to their native speak.
+Many Brother printers are designed for LPR and lack support for common page description languages (PDF, PCL, etc). They require a CUPS wrapper to translate the print options to their native protocol.
 
-There are at least four Brother provided pre-compiled x86 32-bit binaries and can not run on ARM/ARM64. Specifically:
+There are at least four Brother provided pre-compiled x86 32-bit binaries. Specifically:
 
 * `/usr/local/Brother/Printer/HL2270DW/cupswrapper/brcupsconfig4` - wrapper that calls on `brprintconflsr3` to set up `/usr/share/Brother/inf` on every print to pass the current options.
 * `/usr/local/Brother/Printer/HL2270DW/lpd/rawtobr3` - converter for the job to a raster format. Seems to be model-agnostic. Called by `/opt/brother/Printers/BrGenPrintML2/lpd/lpdfilter`
 * `/usr/local/Brother/Printer/HL2270DW/inf/brprintconflsr3` - translates job options to Brother format. Seems to be backward compatible. Called by `/opt/brother/Printers/BrGenPrintML2/cupswrapper/lpdwrapper` from `brgenprintml2pdrv-4.0.0-1.i386.deb` which is itself in the `opt/brother/Printers/BrGenPrintML2/cupswrapper/brother-BrGenPrintML2-cups-en.ppd`
 * `/usr/local/Brother/Printer/HL2270DW/inf/braddprinter` - adds alphanumeric printer model name to `/usr/share/Brother/inf/brPrintList` upon installation. This can be safely ignored.
 
-Below is the example of how to create ARM packages for HL2270DW, but it should work for other printers, both on ARM64 and ARM32 RPis. Substitute the proper packages for your printer. To find these packages:
+Below is an example of how to create ARM packages for Brother HL2270DW, but it should work for other printers, both on ARM64 and ARM32 RPis. Substitute the proper packages for your printer. To find these packages:
 
 * Head out to the Brother website and grab the native i386 Linux deb pacakges. Or
 * Use `tools/web_brother.sh` from [a Brother copyist](https://github.com/illwieckz/debian_copyist_brother) or `curl http://www.brother.com/pub/bsc/linux/infs/<uppercasedmodelhere>` and then grab these packages from http://www.brother.com/pub/bsc/linux/packages/. Or
@@ -38,7 +38,7 @@ Oh, yeah and next time just buy a printer that has [Driverless printing](https:/
 
 > Note: if you just want to install the precompiled packages grab them from this repo and run `sudo apt install psutils cups; sudo dpkg -i hl2270dwlpr-2.1.0-1.armhf.deb cupswrapperHL2270DW-2.0.4-2.armhf.deb`. Steps below show how to re-create them.
 
-We'll be grabbing 2 native arm32 executables and compile one other. All the steps can be done on RPi or on i386, but you'd need to cross-compile `brcupsconfig` for armhf on the latter.
+We'll be grabbing 2 native arm32 executables and compile one other. All the steps can be done on RPi or on x86 Doing it on x86 will require cross-compilation of `brcupsconfig` for armhf.
 
 ### Repackage LPR drivers
 
